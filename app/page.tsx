@@ -1,9 +1,13 @@
+import MapComponent from "@/components/Map";
+
 export default function Home() {
   return (
-    <main className="min-h-screen flex items-center justify-center">
-      <h1 className="text-4xl font-bold">
-        🗺️ AI街歩きガイド
+    <main className="p-4">
+      <h1 className="text-3xl font-bold mb-4">
+        AI街歩きガイド
       </h1>
+
+      <MapComponent />
     </main>
   );
 }
