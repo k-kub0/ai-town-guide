@@ -15,6 +15,35 @@ export default function MapComponent() {
 
   const [address, setAddress] = useState("");
 
+  const [guide, setGuide] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const fetchGuide = async (place: string) => {
+    setLoading(true);
+
+    const response = await fetch("/api/guide", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        place,
+      }),
+    });
+
+    if (!response.ok) {
+      setGuide("AIの取得に失敗しました。");
+      setLoading(false);
+      return;
+    }
+
+    const data = await response.json();
+
+    setGuide(data.guide);
+
+    setLoading(false);
+  };
+
   const handleMapClick = async (event: MapLayerMouseEvent) => {
     const latitude = event.lngLat.lat;
     const longitude = event.lngLat.lng;
@@ -26,6 +55,7 @@ export default function MapComponent() {
 
     const address = await reverseGeocode(latitude, longitude);
     setAddress(address);
+    await fetchGuide(address);
   };
 
   return (
@@ -73,7 +103,25 @@ export default function MapComponent() {
           <h2>住所</h2>
           <p>{address}</p>
         </div>
+
       )}
+
+      <div
+  style={{
+    marginTop: "20px",
+    padding: "16px",
+    border: "1px solid #ccc",
+    borderRadius: "8px",
+  }}
+>
+  <h2>🤖 AIガイド</h2>
+
+  {loading ? (
+    <p>AIが考えています...</p>
+  ) : (
+    <p>{guide}</p>
+  )}
+</div>
     </>
   );
 }
