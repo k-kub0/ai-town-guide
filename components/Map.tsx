@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Map, { Marker } from "react-map-gl/maplibre";
+import Map, { Marker, MapLayerMouseEvent } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
 
+import { reverseGeocode } from "@/lib/geocoding";
 import LocationInfo from "./LocationInfo";
 
 export default function MapComponent() {
@@ -11,6 +12,21 @@ export default function MapComponent() {
     latitude: number;
     longitude: number;
   } | null>(null);
+
+  const [address, setAddress] = useState("");
+
+  const handleMapClick = async (event: MapLayerMouseEvent) => {
+    const latitude = event.lngLat.lat;
+    const longitude = event.lngLat.lng;
+
+    setClickedLocation({
+      latitude,
+      longitude,
+    });
+
+    const address = await reverseGeocode(latitude, longitude);
+    setAddress(address);
+  };
 
   return (
     <>
@@ -25,12 +41,7 @@ export default function MapComponent() {
           height: "600px",
         }}
         mapStyle="https://tiles.openfreemap.org/styles/liberty"
-        onClick={(event) => {
-          setClickedLocation({
-            latitude: event.lngLat.lat,
-            longitude: event.lngLat.lng,
-          });
-        }}
+        onClick={handleMapClick}
       >
         {clickedLocation && (
           <Marker
@@ -48,6 +59,20 @@ export default function MapComponent() {
           latitude={clickedLocation.latitude}
           longitude={clickedLocation.longitude}
         />
+      )}
+
+      {address && (
+        <div
+          style={{
+            marginTop: "20px",
+            padding: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+          }}
+        >
+          <h2>住所</h2>
+          <p>{address}</p>
+        </div>
       )}
     </>
   );
